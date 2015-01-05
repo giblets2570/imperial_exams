@@ -14,3 +14,6 @@ The returned intger takes the value of the position of the start of the substrin
 If the substring is not present then the value -1 is returned
  */
 int substring_position(const char* substring, const char* string);
+
+//Same thing as above
+int substring_position_2(const char* s,const char* l);
