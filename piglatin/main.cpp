@@ -7,6 +7,12 @@ using namespace std;
 
 int main() {
 
+  const char* sentence = "This is a sentence";
+
+  cout << isVowel(sentence[2],2,strlen(sentence)) << endl;
+
+  cout << isVowel(sentence[4],4,strlen(sentence)) << endl;
+
   /* QUESTION 1 */
 
   cout << "====================== Question 1 ======================" << endl;
@@ -32,14 +38,21 @@ int main() {
 
   char translated[100];
 
+  translateWord("900", translated);
+  cout << "In Pig Latin 'thrpls' is '" << translated << "'." << endl;
+
   translateWord("grape", translated);
   cout << "In Pig Latin 'grape' is '" << translated << "'." << endl;
+  cout << strlen(translated) << endl;
   translateWord("orange", translated);
   cout << "In Pig Latin 'orange' is '" << translated << "'." << endl;
+  cout << strlen(translated)<< endl;
   translateWord("Banana", translated);
   cout << "In Pig Latin 'Banana' is '" << translated << "'." << endl;
+  cout << strlen(translated) << endl;
   translateWord("Yellow", translated);
   cout << "In Pig Latin 'Yellow' is '" << translated << "'." << endl;
+  cout << strlen(translated) << endl;
   cout << endl;
 
   /* QUESTION 3 */
@@ -55,6 +68,5 @@ int main() {
 
   return 0;
 }
-
 
 
