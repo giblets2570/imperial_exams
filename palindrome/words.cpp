@@ -16,12 +16,17 @@ void reverse(const char* word, char* reversed_word){
 }
 
 bool compare(const char* one, const char* two){
+  //Check if at the end of the first sentence
   if(*one == '\0'){
+    //if at the end of second sentence, return true
     if(*two == '\0')
       return true;
+    //if there are more letters/numbers after first sentence
+    //finished, the sentences arent equal
     else if(isalnum(*two)){
       return false;
     }
+    //if punctuation, check next letter/number in sentence
     else
       return compare(one, ++two);
   }
@@ -45,6 +50,7 @@ bool compare(const char* one, const char* two){
 
 
 bool palindrome(const char* sentence){
+  //get the reversed sentence
   char reversed_sentence[512];
   reverse(sentence, reversed_sentence);
   return compare(sentence, reversed_sentence);
@@ -52,6 +58,7 @@ bool palindrome(const char* sentence){
 
 bool anagram(const char* str1,const char* str2){
   char sorted_str1[512], sorted_str2[512];
+  
   lower_sorted_letters(str1,sorted_str1);
   lower_sorted_letters(str2,sorted_str2);
 
