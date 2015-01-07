@@ -4,6 +4,7 @@
 #include <cassert>
 #include <map>
 #include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -90,3 +91,114 @@ char rhyming_letter(const char *ending) {
 }
 
 /* START WRITING YOUR FUNCTION BODIES HERE */
+
+int count_words(const char* line){ 
+    int i = 0;
+    int count = 0;
+    while(line[i] != '\0'){
+        if(line[i] == ' ' && line[i-1] != ' ')
+            count++;
+        i++;
+    }
+    if(i > 0)
+        count++;
+    return count;
+}
+
+bool find_phonetic_ending(const char* word, char* phonetic_ending){
+    ifstream inStream;
+    inStream.open("dictionary.txt");
+    char line[512];
+    inStream.getline(line,512);
+    while(!inStream.eof()){
+        char dictWord[512];
+        strcpy(dictWord,strtok(line," "));
+        if(!strcmp(word,dictWord)){
+            char* phonics= strtok(NULL,"\0");
+            get_phonetic_ending(phonics);
+            strcpy(phonetic_ending,phonics);
+            return true;
+        }
+        inStream.getline(line,512);
+    }
+    strcpy(phonetic_ending,"");
+    return false;
+}
+
+void get_phonetic_ending(char* letters){
+    int i = 0,j = 0;
+    char newLetters[512];
+    while(letters[i] != '\0'){
+        if(letters[i] != ' '){
+            newLetters[j++] = letters[i];
+        }
+        i++;
+    }
+    i = 0;
+    newLetters[j] = '\0';
+    int lastVowelIndex = 0;
+
+    while(newLetters[i] != '\0'){
+        if(is_vowel(newLetters[i]))
+            lastVowelIndex = i;
+        i++;
+    }
+    int index = 0;
+    strcpy(letters,"");
+    for(int k = lastVowelIndex; k < j; k++){
+        letters[index++] = newLetters[k];
+    }
+    letters[index] = '\0';
+    return;
+}
+
+bool is_vowel(char ch){
+    switch(ch){
+        case 'A':
+            return true;
+        case 'E':
+            return true;
+        case 'I':
+            return true;
+        case 'O':
+            return true;
+        case 'U':
+            return true;
+        default:
+            return false;
+    }
+    return false;
+}
+
+bool find_rhyme_scheme(const char* filename, char* scheme){
+    ifstream inStream;
+    inStream.open(filename);
+    char line[512];
+    inStream.getline(line,512);
+    rhyming_letter(RESET);
+    while(!inStream.eof()){
+        char word[80];
+        int wordCount = count_words(line);
+        get_word(line,wordCount,word);
+        char ending[80];
+        find_phonetic_ending(word,ending);
+        *(scheme++) = rhyming_letter(ending);
+        inStream.getline(line,512);
+    }
+    *scheme = '\0';
+    return true;
+}
+
+const char* identify_sonnet(const char* filename){
+
+    char scheme[80];
+    find_rhyme_scheme(filename,scheme);
+
+    if(!strcmp(scheme,"ababcdcdefefgg"))
+        return "Shakespearean";
+    else if(!strcmp(scheme,"abbaabbacdcdcd"))
+        return "Petrarchan";
+    else if(!strcmp(scheme,"ababbcbccdcdee"))
+        return "Spenserian";
+    return "Unknown";
+}

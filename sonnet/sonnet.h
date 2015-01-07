@@ -18,3 +18,17 @@ bool get_word(const char *input_line, int number, char *output_word);
    poem) by calling rhyming_letter(RESET). */
 
 char rhyming_letter(const char *ending);
+
+int count_words(const char* line);
+
+bool find_phonetic_ending(const char* word, char* phonetic_ending);
+
+void get_phonetic_ending(char* letters);
+
+bool is_vowel(char ch);
+
+bool find_rhyme_scheme(const char* filename, char* scheme);
+
+void get_last_word(const char* line, char* lastWord);
+
+const char* identify_sonnet(const char* filename);
