@@ -71,6 +71,17 @@ int main() {
   cout << find_path(maze, height, width, '>', 'U') << endl << endl;
 
   deallocate_2D_array(maze, height);
+
+  maze = load_maze("smallmaze.txt", height, width);
+  assert(maze);
+
+  cout << find_path(maze, height, width, '>', 'X') << endl << endl;
+
+  cout << "The path is shown below: " << endl;
+  print_maze(maze, height, width);
+  cout << endl;
+
+  deallocate_2D_array(maze,height);
   
   cout << "=================== Bonus Question =====================" << endl << endl;
 
