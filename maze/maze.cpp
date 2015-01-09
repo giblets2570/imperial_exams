@@ -185,13 +185,8 @@ bool navigate(char** maze, char* path, int height, int width, int row, int col,c
         return true;
     }
 
-    //get a copy of the path so far
-    char tempPath[1024];
-    strcpy(tempPath,path);
-
     //get length of the path
     int pathLength = strlen(path);
-    tempPath[pathLength-1] = '\0';
 
     //setting the current space to #
     char oldSpace = maze[row][col];
@@ -208,15 +203,16 @@ bool navigate(char** maze, char* path, int height, int width, int row, int col,c
     while(directions[i] != '\0'){
         //add new direction to path
         path[pathLength] = directions[i];
+        //move forward
         move(directions[i],row,col,1);
         if(navigate(maze,path,height,width,row,col,end))
             return true;
-    
+        //move backward
         move(directions[i],row,col,-1);
         i++;
     }
     //here you want to restate the path
     maze[row][col] = oldSpace;
-    strcpy(path,tempPath);
+    path[pathLength] = '\0';
     return false;
 }
