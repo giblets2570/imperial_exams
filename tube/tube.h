@@ -21,14 +21,22 @@ const char *error_description(int code);
 /* presupplied helper function for converting string to Direction enum */
 Direction string_to_direction(const char *token);
 
+//gets the symbols bposition on the map and assigns r and c.
+//if not on map r = c = -1 and returns false
 bool get_symbol_position(char** map, int height, int width, char target, int& r, int& c); 
 
+//returns the symbol for a given station or line name
 char get_symbol_for_station_or_line(const char* name);
 
 int validate_route(char** map, int height, int width, const char* start_station, char* route, char* destination);
 
+//moves the current position, returns 0 if move is allowed.
+//returns error int if the movement go out of bounds,
+//or if supplied direction isnt valid
 int move(char** maze, int height, int width, char* dir, int& row, int& col);
 
+//returns the name for a given station or line symbol
 char* get_name_for_station_or_line(char symbol);
 
+//returns true if current is opposite to previous
 bool backHopping(Direction current, Direction previous);
