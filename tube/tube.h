@@ -1,4 +1,4 @@
-enum Direction {N, S, W, E, NE, NW, SE, SW, INVALID_DIRECTION};
+enum Direction {N, W, NW, NE, S, E, SE, SW, INVALID_DIRECTION};
 
 /* error codes for Question 3 */
 #define ERROR_START_STATION_INVALID -1 
@@ -21,10 +21,14 @@ const char *error_description(int code);
 /* presupplied helper function for converting string to Direction enum */
 Direction string_to_direction(const char *token);
 
-const char* get_name_for_station_or_line(char symbol);
-
-bool get_symbol_position(char** map,int height,int width,char target,int& r,int& c);
+bool get_symbol_position(char** map, int height, int width, char target, int& r, int& c); 
 
 char get_symbol_for_station_or_line(const char* name);
 
 int validate_route(char** map, int height, int width, const char* start_station, char* route, char* destination);
+
+int move(char** maze, int height, int width, char* dir, int& row, int& col);
+
+char* get_name_for_station_or_line(char symbol);
+
+bool backHopping(Direction current, Direction previous);

@@ -123,7 +123,7 @@ const char *error_description(int code) {
 
 /* presupplied helper function for converting string to direction enum */
 Direction string_to_direction(const char *token) {
-  const char *strings[] = {"N", "S", "W", "E", "NE", "NW", "SE", "SW"};
+  const char *strings[] = {"N", "W", "NW", "NE", "S", "E", "SE", "SW"};
   for (int n=0; n<8; n++) {
     if (!strcmp(token, strings[n])) 
       return (Direction) n;
@@ -131,127 +131,187 @@ Direction string_to_direction(const char *token) {
   return INVALID_DIRECTION;
 }
 
-bool get_symbol_position(char** map,int height,int width,char target,int& r,int& c){
-    for(c = 0; c < width; c++){
-        for(r = 0; r < height; r++){
-            if(map[r][c] == target)
-                return true;
-        }
-    }
-    r = -1; 
-    c = -1;
+
+bool get_symbol_position(char** map, int height, int width, char target, int& r, int& c){
+    
+    for(r = 0; r < height; r++){
+	for(c = 0; c < width; c++){
+	    if(map[r][c] == target)
+		return true;
+	}
+    } 
+    r = -1; c = -1;
     return false;
 }
 
 char get_symbol_for_station_or_line(const char* name){
-    ifstream inStream;
+    
     const char* filenames[2] = {"stations.txt","lines.txt"};
-
-    char newSymbol,space,newName[80];
-    for(int i = 0; i < 2; i++){
-        inStream.open(filenames[i]);
-        inStream >> newSymbol;
-        while(!inStream.eof()){
-            inStream.get(space);
-            inStream.getline(newName,80);
-            if(!strcmp(newName,name)){
-                inStream.close();
-                return newSymbol;
-            }
-            inStream >> newSymbol;
-        }
-        inStream.close();
+    ifstream in;
+    char placeSymbol, space, placeName[128];
+    for(int d = 0; d < 2; d++){
+	in.open(filenames[d]);
+	in.get(placeSymbol);
+	while(!in.eof()){
+	    in.get(space);
+	    in.getline(placeName,128);
+	    if(!strcmp(placeName,name)){
+		in.close();
+		return placeSymbol;
+	    }
+	    in.get(placeSymbol);
+	}
+	in.close();
     }
     return ' ';
 }
 
-// const char* get_name_for_station_or_line(char symbol){
-//     ifstream inStream;
-//     const char* filenames[2] = {"stations.txt","lines.txt"};
+char* get_name_for_station_or_line(char symbol){
+    
+    const char* filenames[2] = {"stations.txt","lines.txt"};
+    ifstream in;
+    char placeSymbol, space;
 
-//     char newSymbol,space,newName[80];
-//     for(int i = 0; i < 2; i++){
-//         inStream.open(filenames[i]);
-//         inStream >> newSymbol;
-//         while(!inStream.eof()){
-//             inStream.get(space);
-//             inStream.getline(newName,80);
-//             if(symbol == newSymbol){
-//                 inStream.close();
-//                 return newName;
-//             }
-//             inStream >> newSymbol;
-//         }
-//         inStream.close();
-//     }
-//     return " ";
-// }
+    static char placeName[128] = "";
+
+    for(int d = 0; d < 2; d++){
+	in.open(filenames[d]);
+	in.get(placeSymbol);
+	while(!in.eof()){
+	    in.get(space);
+	    in.getline(placeName,128);
+	    if(placeSymbol == symbol){
+		in.close();
+		return placeName;
+	    }
+	    in.get(placeSymbol);
+	}
+	in.close();
+    }
+    strcpy(placeName," ");
+    return placeName;
+}
 
 int validate_route(char** map, int height, int width, const char* start_station, char* route, char* destination){
 
-    char startStationSymbol = get_symbol_for_station_or_line(start_station);
-    int row, col;
+    char startSymbol = get_symbol_for_station_or_line(start_station);
+    if(!isalnum(startSymbol))
+	return ERROR_START_STATION_INVALID;
+    
+    int currentRow, currentCol, linechanges = 0;
+    char currentLine = '@';
 
-    if(!isalnum(startStationSymbol) || get_symbol_position(map,height,width,startStationSymbol,row,col))
-        return ERROR_START_STATION_INVALID;
+    if(!get_symbol_position(map, height, width,startSymbol,currentRow,currentCol))
+	return ERROR_START_STATION_INVALID;
 
+    bool atStation = true, justAtStation = false;
+    char* p;
+    Direction current, previous = INVALID_DIRECTION;
+    p = strtok(route,",");
 
-    char* direction;
-    direction = strtok(route,",");
+    while(p){
+	//Taking care of the movement
+	int movement = move(map,height,width,p,currentRow,currentCol);
+	if(movement != 0)
+	    return movement;
+	
+	if(map[currentRow][currentCol] == ' ')
+	    return ERROR_OUT_OF_BOUNDS;
 
-    while(direction){
-        int move = move(row,col,direction);
-        //
-        if(move < 0)
-            return move;
+	current = string_to_direction(p);
+	
+	//checking for linechanges
 
-        if(map[row][col] == ' ')
-            return ERROR_OFF_TRACK;
+	justAtStation = atStation;
+	atStation = isalnum(map[currentRow][currentCol]);
 
-        
+	if(backHopping(current, previous)){
+	    if(justAtStation)
+		linechanges++;
+	    else
+		return ERROR_BACKTRACKING_BETWEEN_STATIONS;
+	}
+	if(justAtStation){
+	    if(map[currentRow][currentCol] != currentLine){
+		if(previous != INVALID_DIRECTION)
+		    linechanges++;
+		currentLine = map[currentRow][currentCol];
+	    }
+	}
 
-        
-        direction = strtok(NULL,",");
+	else{
+	    if(!atStation){
+		if(map[currentRow][currentCol] != currentLine){
+		    return ERROR_LINE_HOPPING_BETWEEN_STATIONS;
+		}
+	    }
+	}
+
+	previous = current;
+
+	p = strtok(NULL,",");
     }
 
-    return 1;
+    if(!isalnum(map[currentRow][currentCol]))
+	return ERROR_ROUTE_ENDPOINT_IS_NOT_STATION;
+    
+    strcpy(destination,get_name_for_station_or_line(map[currentRow][currentCol]));
+    
+    if(!strcmp(destination," "))
+	return ERROR_ROUTE_ENDPOINT_IS_NOT_STATION;
+
+    return linechanges;
 }
 
-int move(int& row, int& col, char* dir){
+int move(char** maze, int height, int width, char* dir, int& row, int& col){
     Direction d = string_to_direction(dir);
-    if(d < 0)
-        return d;
+    if(d == ERROR_INVALID_DIRECTION)
+	return d;
     switch(d){
-        case N:
-            row--;
-            break;
-        case S:
-            row++;
-            break;
-        case E:
-            col++;
-            break;
-        case W:
-            col--;
-            break;
-        case NE:
-            row--;
-            col++;
-            break;
-        case NW:
-            row--;
-            col--;
-            break;
-        case SE:
-            row++;
-            col++;
-            break;
-        case SW:
-            row++;
-            col--;
-            break;
-        default:
-            break;
+    case N:
+	row--;
+	break;
+    case E:
+	col++;
+	break;
+    case S:
+	row++;
+	break;
+    case W:
+	col--;
+	break;
+    case NW:
+	row--;
+	col--;
+	break;
+    case NE:
+	row--;
+	col++;
+	break;
+    case SW:
+	row++;
+	col--;
+	break;
+    case SE:
+	row++;
+	col++;
+	break;
+    default:
+	break;
     }
+    if(row < 0|| row >= height)
+	return ERROR_OUT_OF_BOUNDS;
+    if(col < 0 || col >= width)
+	return ERROR_OUT_OF_BOUNDS;
     return 0;
+}
+
+bool backHopping(Direction current, Direction previous){
+    if(previous == INVALID_DIRECTION)
+	return false;
+    if(current == previous - 4)
+	return true;
+    if(current == previous + 4)
+	return true;
+    return false;
 }
