@@ -97,11 +97,9 @@ void print_maze(char **m, int height, int width) {
 
 bool find_marker(char ch, char** maze, int height, int width, int& row, int& column){
 
-    for(int i = 0; i < height; i++){
-        for(int j = 0; j < width; j++){
-            if(maze[i][j] == ch){
-                row = i;
-                column = j;
+    for(row = 0; row < height; row++){
+        for(column = 0; column < width; column++){
+            if(maze[row][column] == ch){
                 return true;
             }
         }
@@ -118,7 +116,7 @@ bool valid_solution(const char* path, char** maze, int height, int width){
         return false;
 
     while(path[step] != '\0'){
-        move(path[step],row,col);
+        move(path[step],row,col,1);
         if(blockage(maze,height,width,row,col))
             return false;
         step++;
@@ -128,39 +126,19 @@ bool valid_solution(const char* path, char** maze, int height, int width){
     return true;
 }
 
-void move(char direction, int& row, int& column){
+void move(char direction, int& row, int& column, int dir){
     switch(direction){
         case 'E':
-            column++;
+            column+=dir;
             break;
         case 'W':
-            column--;
+            column-=dir;
             break;
         case 'N':
-            row--;
+            row-=dir;
             break;
         case 'S':
-            row++;
-            break;
-        default:
-            break;
-    } 
-    return;
-}
-
-void moveBack(char direction, int& row, int& column){
-    switch(direction){
-        case 'E':
-            column--;
-            break;
-        case 'W':
-            column++;
-            break;
-        case 'N':
-            row++;
-            break;
-        case 'S':
-            row--;
+            row+=dir;
             break;
         default:
             break;
@@ -175,10 +153,9 @@ bool blockage(char** maze, int height, int width, int row, int col){
     return (maze[row][col] == '-' || maze[row][col] == '+' || maze[row][col] == '|' || maze[row][col] == '#');
 }
 
-void valid_directions(char** maze, int height, int width, int row, int col, char* result, char last){
+void valid_directions(char** maze, int height, int width, int row, int col, char* result){
     strcpy(result,"");
     int i = 0;
-    //cout << "In valid directions ";
     if(!blockage(maze,height,width,row+1,col))
         result[i++] = 'S';
     if(!blockage(maze,height,width,row-1,col))
@@ -188,57 +165,54 @@ void valid_directions(char** maze, int height, int width, int row, int col, char
     if(!blockage(maze,height,width,row,col-1))
         result[i++] = 'W';
     result[i] = '\0';
-    //cout << result << endl;
     return;
 }
 
 const char* find_path(char** maze, int height, int width, char start, char end){
-    char path[512];
+    static char path[1024] = "";
     int row, col;
     find_marker(start,maze,height,width,row,col);
-    if(navigate(maze,path,height,width,row,col,end,' ')){
+    if(navigate(maze,path,height,width,row,col,end))
         return path;
-    }
     return "no solutions";
 }
 
-bool navigate(char** maze, char* path, int height, int width, int row, int col,char end, char last){
+bool navigate(char** maze, char* path, int height, int width, int row, int col,char end){
 
+    //see if the end is neigh
     if(maze[row][col] == end){
         maze[row][col] = '#';
         return true;
     }
 
+    //get length of the path
+    int pathLength = strlen(path);
+
+    //setting the current space to #
+    char oldSpace = maze[row][col];
     maze[row][col] = '#';
 
+    //find the valid directions of movement
     char directions[4];
+    valid_directions(maze,height,width,row,col,directions);
 
-    valid_directions(maze,height,width,row,col,directions,last);
+    //increase path size for new directions
+    path[pathLength+1] = '\0';
 
-    if(strlen(directions) == 0){
-        return false;
-    }
-
-    int pathLength = strlen(path);
-    char* newPath = new char[pathLength+2];
-    newPath[pathLength+1] = '\0';
     int i = 0;
-
     while(directions[i] != '\0'){
-
-        strcpy(newPath,path);
-        newPath[pathLength] = directions[i];
-
-        move(directions[i],row,col);
-        if(navigate(maze,newPath,height,width,row,col,end,directions[i])){
-            strcpy(path,newPath);
-            delete newPath;
+        //add new direction to path
+        path[pathLength] = directions[i];
+        //move forward
+        move(directions[i],row,col,1);
+        if(navigate(maze,path,height,width,row,col,end))
             return true;
-        }
-        maze[row][col] = ' ';
-        moveBack(directions[i],row,col);
+        //move backward
+        move(directions[i],row,col,-1);
         i++;
     }
-    delete newPath;
+    //here you want to restate the path
+    maze[row][col] = oldSpace;
+    path[pathLength] = '\0';
     return false;
 }

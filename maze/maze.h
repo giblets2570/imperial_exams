@@ -16,13 +16,11 @@ bool find_marker(char ch, char** maze, int height, int width, int& row, int& col
 
 bool valid_solution(const char* path, char** maze, int height, int width);
 
-void moveBack(char direction, int& row, int& column);
-
 bool blockage(char** maze, int height, int width, int row, int col);
 
-void move(char direction, int& row, int& column);
+void move(char direction, int& row, int& column, int dir);
 
-bool navigate(char** maze, char* path, int height, int width, int row, int col,char end,char last);
+bool navigate(char** maze, char* path, int height, int width, int row, int col,char end);
 
 void valid_directions(char** maze, int height, int width, int row, int col, char* result);
 
