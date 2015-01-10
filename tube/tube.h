@@ -28,6 +28,7 @@ bool get_symbol_position(char** map, int height, int width, char target, int& r,
 //returns the symbol for a given station or line name
 char get_symbol_for_station_or_line(const char* name);
 
+
 int validate_route(char** map, int height, int width, const char* start_station, char* route, char* destination);
 
 //moves the current position, returns 0 if move is allowed.

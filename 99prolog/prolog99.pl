@@ -270,3 +270,126 @@ range(N1,N2,[N1|T]):-
 	NN is N1 + 1,
 	range(NN,N2,T).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    26
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+combination(N,L,X):-
+	combination(N,L,[],X,0).
+
+combination(N,_,X,X,N).
+
+combination(N,[H|T],Acc,X,K):-
+	K < N,
+	KK is K + 1,
+	append(Acc,[H],Nacc),
+	combination(N,T,Nacc,X,KK).
+
+combination(N,[_|T],Acc,X,K):-
+	K < N,
+	combination(N,T,Acc,X,K).
+
+combination2(N,L,X):-
+	combination2(N,L,X,0).
+
+combination2(N,_,[],N).
+
+combination2(N,[H|T1],[H|T2],K):-
+	K < N,
+	KK is K+1,
+	combination2(N,T1,T2,KK).
+
+combination2(N,[H|T],L,K):-
+	K < N,
+	combination2(N,T,L,K).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    27
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%% a)
+
+combination3(N,L,X,RestL):-
+	combination3(N,L,X,RestL,0).
+
+combination3(N,_,[],[],N).
+
+combination3(N,[H|T1],[H|T2],L,K):-
+	K < N,
+	KK is K+1,
+	combination3(N,T1,T2,L,KK).
+
+combination3(N,[H|T1],L,[H|T2],K):-
+	K < N,
+	combination3(N,T1,L,T2,K).
+
+group3(L,G1,G2,G3):-
+	combination3(2,L,G1,R1),
+	combination3(3,R1,G2,R2),
+	combination3(4,R2,G3,_).
+
+%%%%%%%%%%%%%%%%%%%%%%%% b)
+
+group([],[],[]).
+
+group(L,[N|T],[G|T2]):-
+	combination3(N,L,G,R),
+	group(R,T,T2).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    28
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+max_length([L],N):-
+	length(L,N).
+
+max_length([L1,L2|T],X):-
+	length(L1,N1),
+	length(L2,N2),
+	N1>N2,
+	max_length([L1|T],X).
+
+max_length([L1,L2|T],X):-
+	length(L1,N1),
+	length(L2,N2),
+	N1=<N2,
+	max_length([L2|T],X).
+
+lsort(L,X):-
+	lsort(L,X,1),
+	!.
+
+lsort(L,[],NN):-
+	max_length(L,N),
+	NN is N+1.
+
+lsort(L,RT,K):-
+	KK is K+1,
+	findall(X,(member(X,L),length(X,K)),R),
+	lsort(L,T,KK),
+	append(R,T,RT).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+frequency(N,L,X):-
+	frequency(N,L,X,0).
+
+frequency(_,[],X,X).
+
+frequency(N,[H|T],X,K):-
+	length(H,N),
+	KK is K+1,
+	frequency(N,T,X,KK).
+
+frequency(N,[H|T],X,K):-
+	length(H,M),
+	M\=N,
+	frequency(N,T,X,K).
+
+max_freq(
