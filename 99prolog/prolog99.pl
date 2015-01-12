@@ -419,22 +419,50 @@ lfsort(L,X,Acc,N):-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%    31
+%    32
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-not_prime(N):-
-    not_prime(N,2).
+gcd(A,B,B):-
+	0 is mod(A,B).
 
-not_prime(N,K),
-    K =< sqrt(N),
-    0 is mod(N,K).
-   
-not_prime(N,K):-
-    K =< sqrt(N),
-    \+ 0 is mod(N,K),
-    K1 is K + 1,
-    not_prime(N,K1).
+gcd(A,B,G):-
+	X is mod(A,B),
+	X \= 0,
+	gcd(B,X,G).
 
-is_prime(N):-
-    \+ not_prime(N).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    33
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+coprime(A,B):-
+	gcd(A,B,1).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    34
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+totient(N,P):-
+	range(1,N,L),
+	setof(X,(member(X,L),coprime(X,N)),List),
+	length(List,P).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    35
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+factor(N,2):-
+	0 is mod(N,2).
+
+factor(N,3):-
+	0 is mod(N,3).
+
+factor(N,K):-
+	KK is K+2,
+	factor(N,K).
